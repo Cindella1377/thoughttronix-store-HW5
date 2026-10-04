@@ -125,6 +125,21 @@ def test_staff_can_mark_a_product_unavailable(client, staff_user, product):
     assert not product.is_available
 
 
+def test_staff_can_feature_and_unfeature_a_product(client, staff_user, product):
+    client.force_login(staff_user)
+    url = reverse("products:manage_product_update", kwargs={"pk": product.pk})
+    data = product_data(product.category, name=product.name, slug=product.slug)
+
+    client.post(url, data | {"is_featured": "on"})
+    product.refresh_from_db()
+    assert product.is_featured
+    assert "Featured" in client.get(product.get_absolute_url()).content.decode()
+
+    client.post(url, data)  # an unchecked checkbox is simply absent
+    product.refresh_from_db()
+    assert not product.is_featured
+
+
 def test_staff_can_delete_a_product(client, staff_user, product):
     client.force_login(staff_user)
 

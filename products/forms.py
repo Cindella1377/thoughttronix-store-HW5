@@ -61,6 +61,7 @@ class ProductForm(StyledModelForm):
             "category",
             "tags",
             "is_available",
+            "is_featured",
             "image",
         ]
 
