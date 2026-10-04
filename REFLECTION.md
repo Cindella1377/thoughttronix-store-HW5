@@ -1,3 +1,54 @@
+# Product Images - Questions
+
+1. 
+I didn't disagree, but it did point me to the thumbnails idea for the back office. This will help keep space down for "staff" and see the image is correct which is the best direction to go and ensure everything is listed correctly.
+
+2.
+A.  
+image = models.ImageField(upload_to="products/", blank=True) ----> saves uploaded files into media/products
+B.
+<form method="post" enctype="multipart/form-data" class="mt-2 space-y-4">
+  {% csrf_token %}
+  {% for field in form %}
+    {% include "products/partials/_field.html" %}
+  {% endfor %}
+
+enctype is needed to upload the image if it isn't working it only send file name but not the file.
+
+3.
+Lumin Drake is the product I created. The pathway the image is stored on {C:\Users\saman\cidm3312\thoughttronix-store - HW5\media\products\Lumin_Drake.jpg}. The value stored in the database for the image is {products/Lumin_Drake.jpg}. and the URL browser requests to display it shows {/media/products/Lumin_Drake.jpg (in full: http://127.0.0.1:8000/media/products/Lumin_Drake.jpg)}
+
+Product --> Media ---> URL 
+   the starting point is at product, the file is located in media, and url is how it ties it all together
+
+
+****Best explaination in my words:
+The image file is stored locally at media/products/lumin_drake.jpg. The base directory is governed by the media_root configs in config/settings.py (line144). The products/ folder inside media is determined by the upload_to="products/" directions set on the product's Imagefield in products/models.py (line 77). To prevent saving raw image in binary it stores the relative path string products/lumin_drake.jpg (strug) which is string value for the image column, that corresponds to the image field listed on the projuct model in products/models.py. Displaying the piscure is a request from the browser /media/products/lumin_drake.jpg. Django generates the url by prefixing the data path (products/lumin_drake.jpg) in the project media_url setting. It configured in config/settings.py. The media URL functions on the local server urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) with help from config/urls.py (line22). which snippet the instructions for django dev server intercept /media requesting and corresponding physical file directly from directory specified by media_root, which is only active when debug= true is on.
+
+
+***Claude helping me explain:
+ Path on disk. The file is saved at  media\products\Lumin_Drake.jpg in your project folder. The setting that decides the folder is MEDIA_ROOT, defined in the file settings config/settings.py (line 144). The subfolder products/ comes from  upload_to="products/" on the field in the image field in products/models.py (line 77)duct.
+2. Database value. The database stores the text  products/Lumin_Drake.jpg , not the picture itself. The field that stores it is  image (an ImageField), defined in products/models.py (right).
+3. URL. The browser requests /media/products/Lumin_Drake.jpg. Django builds it by putting the setting  MEDIA_URL, which is "media/" in front of the database value, products/Lumin_Drake.jpg
+4. Why it works on the dev server. The line  urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  in the file config/urls.py (line 22) adds a route that answers /media/ requests by  finding the file in the media folder (MEDIA_ROOT) and sending it back. It only works when DEBUG is on.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Question 1 Answer:
 Marking the product as featured in the admin interface is a true/fals logic that when check it displays the badge on the catoglog list. If you uncheck it, this would remove the badge stating featured. The logic is located in products --> 0003_product_is_featured.py file. This is  migrated which works with the catalog_complete file also. 
 
