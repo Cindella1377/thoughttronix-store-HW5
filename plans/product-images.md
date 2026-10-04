@@ -76,7 +76,7 @@
 
 **Tasks:**
 1. `CLAUDE.md`: name this PRD and plan in the opening paragraph; note `media/` and `product-images/` in the project layout; note `Product.image_url` as the one place that chooses photo or placeholder.
-2. `PROMPTS.md`: append this session's entries. Never rewrite earlier ones.
+2. `PROMPTS.md`: leave it alone. Its own rules say an entry is added only when the user gives the session-log prompt at the end of a session, never unprompted.
 3. Final pass: `uv run pytest`, `uv run ruff check .`, `uv run ruff format .`.
 
 **Verification.** *Automated:* suite green, Ruff clean. *Manual:* from a fresh clone, `uv sync`, `migrate`, `seed`, and `tailwind runserver` produce the demo catalog with photos.

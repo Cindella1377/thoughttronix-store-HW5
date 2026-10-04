@@ -48,7 +48,7 @@ The PRD and plan were written and summarised to the user, who moved straight to 
 
 - They asked to be treated as a beginner. Explain what a step does and why in plain terms, and say what you are about to change before changing it.
 - This is coursework (CIDM 3312, Homework 5). The assignment wording was never shared; if a requirement seems to hinge on it, ask.
-- `PROMPTS.md` is the AI-usage log and must be appended to, never rewritten (plan Phase 5). This session's prompts to log, in order: a `/grill-me` request to add catalog product photos with real images plus a baseline placeholder from `product-images/`; eleven one-line answers choosing an option at each interview question (all recorded as decisions in the PRD); a request to create the handoff skill file; and this `/handoff` invocation. Match the existing entry format in `PROMPTS.md`.
+- `PROMPTS.md` is the AI-usage log. Do not write to it unprompted: its header says an entry is added only when the user gives the session-log prompt at the end of a session, and each session logs only its own prompts. The design session's prompts are the user's to log from that session, not yours.
 
 ## Suggested skills
 
