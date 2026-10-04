@@ -18,6 +18,7 @@
       <table class="table">
         <thead>
           <tr>
+            <th>Photo</th>
             <th>Product</th>
             <th>Category</th>
             <th>Price</th>
@@ -28,6 +29,10 @@
         <tbody>
           {% for product in products %}
             <tr>
+              <td>
+                <img src="{{ product.image_url }}" alt="{{ product.name }}"
+                     class="h-12 w-12 rounded object-cover" />
+              </td>
               <td>
                 <a href="{% url 'products:manage_product_update' product.pk %}"
                    class="link-hover font-semibold">{{ product.name }}</a>

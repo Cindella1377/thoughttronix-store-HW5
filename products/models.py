@@ -1,9 +1,11 @@
 from django.db import models
+from django.templatetags.static import static
 from django.urls import reverse
 
 # Categories with a dedicated placeholder illustration; anything else
-# falls back to default.svg. No media handling in the core — placeholder
-# images are static files chosen by category.
+# falls back to default.svg. Placeholders are static files chosen by
+# category; a product's own photo, when it has one, is an uploaded media
+# file (see Product.image_url).
 PLACEHOLDER_CATEGORIES = {
     "home-assistants",
     "neural-implants",
@@ -72,6 +74,7 @@ class Product(models.Model):
         related_name="products",
     )
     tags = models.ManyToManyField(Tag, blank=True, related_name="products")
+    image = models.ImageField(upload_to="products/", blank=True)
 
     objects = ProductQuerySet.as_manager()
 
@@ -83,3 +86,11 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return reverse("products:detail", kwargs={"slug": self.slug})
+
+    @property
+    def image_url(self):
+        """URL of the image to show: the photo if there is one, else the
+        category's placeholder. The one place that makes this choice."""
+        if self.image:
+            return self.image.url
+        return static(self.category.placeholder_image)

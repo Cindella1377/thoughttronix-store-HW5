@@ -1,6 +1,6 @@
 # CLAUDE.md — The ThoughtTronix Store
 
-A server-rendered Django 6 storefront and back office. The PRD (`prd/core-platform.md`) and the plan (`plans/core-platform.md`) record how the core platform was designed and built; `prd/coupons.md` and `plans/coupons.md` do the same for coupon codes.
+A server-rendered Django 6 storefront and back office. The PRD (`prd/core-platform.md`) and the plan (`plans/core-platform.md`) record how the core platform was designed and built; `prd/coupons.md` and `plans/coupons.md` do the same for coupon codes, and `prd/product-images.md` and `plans/product-images.md` for product photos.
 
 ## Commands
 
@@ -20,7 +20,13 @@ A server-rendered Django 6 storefront and back office. The PRD (`prd/core-platfo
   `job_title`). Roles are Django's own vocabulary: customers are plain users,
   employees are `is_staff`, the admin is `is_superuser`. No role field, no Groups.
 - `products/` — catalog (`Category`, `Product`, `Tag`), its back-office CRUD,
-  and the `seed` command
+  and the `seed` command. A product may carry one photo (`Product.image`);
+  `Product.image_url` is the one place that chooses between the photo and
+  the category placeholder — templates use it and never repeat the choice.
+- `product-images/` — the seed's source photos. The JPEG copies are
+  committed; the full-size PNG originals are gitignored.
+- `media/` — uploaded photos; runtime data like `db.sqlite3` (gitignored,
+  rebuilt by `seed`, served by Django only when `DEBUG` is on)
 - `orders/` — cart, checkout, orders, coupons, and back-office order and
   coupon management. The cart page carries six HTMX interactions: the
   core's add, quantity, and remove, plus apply coupon, remove coupon, and
@@ -76,4 +82,5 @@ via environs with working defaults — the app must run with no `.env` present.
 
 pytest + pytest-django. Shared fixtures live in the project-level
 `conftest.py` — plain fixtures, no factory-boy. Tests never invoke the seed
-command. The suite must be green at every phase boundary.
+command. Every test runs with `MEDIA_ROOT` pointed at a temporary directory
+(the autouse `media_root` fixture), so none can touch the real `media/`. The suite must be green at every phase boundary.

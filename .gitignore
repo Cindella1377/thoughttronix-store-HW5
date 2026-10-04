@@ -9,10 +9,15 @@ __pycache__/
 # Django
 db.sqlite3
 staticfiles/
+media/
 
 # Tailwind (downloaded CLI binary and compiled CSS)
 .django_tailwind_cli/
 assets/css/tailwind.css
+
+# Product photos: the JPEG copies are committed (seed reads them); the
+# full-size PNG originals stay on disk only.
+product-images/*.png
 
 # Tool caches
 .pytest_cache/

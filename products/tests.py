@@ -7,9 +7,11 @@ from django.core.management import call_command
 from django.db import IntegrityError
 from django.urls import reverse
 from django.utils.html import escape
+from django.utils.text import slugify
 
 from orders.models import CartItem, Coupon, Order, OrderItem
 
+from .management.commands.seed import CATALOG, PHOTO_DIR, PRODUCT_PHOTOS
 from .models import Category, Product, Tag
 
 # --- Model behavior -------------------------------------------------------
@@ -58,6 +60,26 @@ def test_category_get_absolute_url(category):
     assert category.get_absolute_url() == "/categories/home-assistants/"
 
 
+def test_image_url_is_the_photo_when_there_is_one(product, photo):
+    product.image.save("photo.png", photo)
+
+    assert product.image_url.startswith("/media/products/photo")
+    assert product.image_url.endswith(".png")
+
+
+def test_image_url_falls_back_to_the_category_placeholder(product):
+    assert product.image_url == "/static/images/placeholders/home-assistants.svg"
+
+
+def test_image_url_uses_the_default_placeholder_for_an_unlisted_category(db):
+    category = Category.objects.create(name="Oddities", slug="oddities")
+    product = Product.objects.create(
+        name="Mystery Box", slug="mystery-box", price=Decimal("1.00"), category=category
+    )
+
+    assert product.image_url == "/static/images/placeholders/default.svg"
+
+
 # --- Catalog views ---------------------------------------------------------
 
 
@@ -81,6 +103,23 @@ def test_detail_page(client, product):
     page = response.content.decode()
     assert product.name in page
     assert escape(product.description) in page
+
+
+def test_storefront_shows_the_photo_when_there_is_one(client, product, photo):
+    product.image.save("photo.png", photo)
+
+    for url in (reverse("products:catalog"), product.get_absolute_url()):
+        page = client.get(url).content.decode()
+
+        assert f'src="{product.image.url}"' in page, url
+        assert "placeholders" not in page, url
+
+
+def test_storefront_shows_the_placeholder_without_a_photo(client, product):
+    for url in (reverse("products:catalog"), product.get_absolute_url()):
+        page = client.get(url).content.decode()
+
+        assert 'src="/static/images/placeholders/home-assistants.svg"' in page, url
 
 
 def test_detail_unknown_slug_404(client, db):
@@ -228,6 +267,18 @@ def test_catalog_paginates_at_twelve(client, category):
 
 
 # --- The seed command -------------------------------------------------------
+
+
+def test_seed_photos_match_the_catalog_and_the_files_on_disk():
+    """Checked against the seed's data, without running the command."""
+    catalog_slugs = {
+        slugify(name) for entries in CATALOG.values() for name, *_ in entries
+    }
+
+    assert len(PRODUCT_PHOTOS) == 12
+    for slug, filename in PRODUCT_PHOTOS.items():
+        assert slug in catalog_slugs, slug
+        assert (PHOTO_DIR / filename).is_file(), filename
 
 
 def test_seed_builds_the_demo_world(db):

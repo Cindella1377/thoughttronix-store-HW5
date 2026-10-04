@@ -6,12 +6,31 @@ grows with the project; tests never invoke the seed command.
 
 import datetime
 from decimal import Decimal
+from io import BytesIO
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
 
 from orders.models import Cart, CartItem, Coupon
 from products.models import Category, Product, Tag
+
+
+@pytest.fixture(autouse=True)
+def media_root(settings, tmp_path):
+    """Point uploads at a temporary directory. Applied to every test, so
+    nothing — the seed tests included — can touch the real ``media/``."""
+    settings.MEDIA_ROOT = tmp_path / "media"
+    return settings.MEDIA_ROOT
+
+
+@pytest.fixture
+def photo():
+    """A tiny real image, generated in memory, as a staff upload."""
+    buffer = BytesIO()
+    Image.new("RGB", (4, 5), "purple").save(buffer, format="PNG")
+    return SimpleUploadedFile("photo.png", buffer.getvalue(), content_type="image/png")
 
 
 @pytest.fixture

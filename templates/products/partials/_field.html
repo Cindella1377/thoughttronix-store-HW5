@@ -8,7 +8,12 @@
     </label>
   {% else %}
     <label class="label mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
-    {{ field }}
+    {% if field.widget_type == "clearablefile" %}
+      {# A file field with a saved file renders several pieces; keep them under the label. #}
+      <div class="space-y-1 text-sm">{{ field }}</div>
+    {% else %}
+      {{ field }}
+    {% endif %}
   {% endif %}
   {% if field.help_text %}
     <p class="mt-1 text-xs opacity-60">{{ field.help_text }}</p>

@@ -15,11 +15,15 @@ notice appear the first time 'customer' opens the cart.
 """
 
 import random
+import shutil
 from datetime import timedelta
 from decimal import Decimal
+from pathlib import Path
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.files import File
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 from django.utils.text import slugify
@@ -427,6 +431,25 @@ CATALOG = {
     ],
 }
 
+# Product photos: product slug -> file in product-images/. Exact matches
+# only — a photo goes to the one product it depicts; every other product
+# keeps its category placeholder.
+PHOTO_DIR = settings.BASE_DIR / "product-images"
+PRODUCT_PHOTOS = {
+    "seraphine": "Seraphine GPT Text.jpg",
+    "hush": "Hush GPT No Text.jpg",
+    "mindsync": "MindSync GPT 2.jpg",
+    "mindsync-duo": "MindSync Duo.jpg",
+    "recallpro": "RecallPro.jpg",
+    "moodset": "MoodSet GPT No Text.jpg",
+    "dreamweaver": "DreamWeaver Matrix GPT 3.jpg",
+    "veil": "Veil GPT Text.jpg",
+    "calm-collar": "Calm Collar GPT Man.jpg",
+    "syncrest": "SyncRest GPT No Text.jpg",
+    "soulsear-mark-i": "SoulSear No Text.jpg",
+    "crowdcalm-array": "CrowdCalm Array No Text.jpg",
+}
+
 DEMO_USERS = [
     # (username, password, email, first, last, is_staff, is_superuser, job_title)
     ("admin", "admin123", "admin@example.com", "Ada", "Admin", True, True, None),
@@ -536,6 +559,7 @@ class Command(BaseCommand):
         self._wipe()
         tags = self._create_tags()
         self._create_catalog(tags)
+        self._attach_photos()
         self._create_users()
         self._create_coupons()
         self._create_customer_cart()
@@ -567,6 +591,10 @@ class Command(BaseCommand):
         ]
         get_user_model().objects.filter(username__in=managed_usernames).delete()
 
+        # Product photos live on disk, not in the database; without this
+        # every run would leave the last run's files behind.
+        shutil.rmtree(Path(settings.MEDIA_ROOT) / "products", ignore_errors=True)
+
     def _create_tags(self):
         return {
             name: Tag.objects.create(name=name, slug=slugify(name)) for name in TAGS
@@ -588,6 +616,16 @@ class Command(BaseCommand):
                     category=category,
                 )
                 product.tags.set(tags[tag_name] for tag_name in tag_names)
+
+    def _attach_photos(self):
+        """Give each product in PRODUCT_PHOTOS its photo, saved through the
+        ImageField so the file lands in media/ like a staff upload."""
+        for slug, filename in PRODUCT_PHOTOS.items():
+            source = PHOTO_DIR / filename
+            if not source.is_file():
+                raise CommandError(f"Product photo not found: {source}")
+            with source.open("rb") as photo:
+                Product.objects.get(slug=slug).image.save(filename, File(photo))
 
     def _create_users(self):
         User = get_user_model()
