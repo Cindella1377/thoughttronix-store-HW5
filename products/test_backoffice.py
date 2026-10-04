@@ -4,8 +4,10 @@ from decimal import Decimal
 from http import HTTPStatus
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
+from .forms import MAX_IMAGE_BYTES, ProductForm
 from .models import Category, Product, Tag
 
 pytestmark = pytest.mark.django_db
@@ -123,6 +125,21 @@ def test_staff_can_mark_a_product_unavailable(client, staff_user, product):
     assert not product.is_available
 
 
+def test_staff_can_feature_and_unfeature_a_product(client, staff_user, product):
+    client.force_login(staff_user)
+    url = reverse("products:manage_product_update", kwargs={"pk": product.pk})
+    data = product_data(product.category, name=product.name, slug=product.slug)
+
+    client.post(url, data | {"is_featured": "on"})
+    product.refresh_from_db()
+    assert product.is_featured
+    assert "Featured" in client.get(product.get_absolute_url()).content.decode()
+
+    client.post(url, data)  # an unchecked checkbox is simply absent
+    product.refresh_from_db()
+    assert not product.is_featured
+
+
 def test_staff_can_delete_a_product(client, staff_user, product):
     client.force_login(staff_user)
 
@@ -143,6 +160,104 @@ def test_manage_list_shows_unavailable_products(
 
     assert unavailable_product.name in page
     assert "Unavailable" in page
+
+
+def test_manage_list_shows_a_thumbnail_for_every_product(
+    client, staff_user, product, unavailable_product, photo
+):
+    product.image.save("photo.png", photo)
+    client.force_login(staff_user)
+
+    page = client.get(reverse("products:manage_products")).content.decode()
+
+    assert f'src="{product.image.url}"' in page
+    assert 'src="/static/images/placeholders/home-assistants.svg"' in page
+
+
+# --- Product photos ----------------------------------------------------------
+
+
+def test_form_accepts_a_photo(category, photo):
+    form = ProductForm(product_data(category), {"image": photo})
+
+    assert form.is_valid(), form.errors
+    assert form.save().image.name.startswith("products/photo")
+
+
+def test_form_rejects_a_file_that_is_not_an_image(category):
+    notes = SimpleUploadedFile("notes.txt", b"not an image", content_type="text/plain")
+
+    form = ProductForm(product_data(category), {"image": notes})
+
+    assert not form.is_valid()
+    assert "Upload a valid image" in form.errors["image"][0]
+
+
+def test_form_rejects_a_photo_over_the_size_limit(category, photo):
+    # A real image padded past the limit: still an image, just too big.
+    oversized = SimpleUploadedFile(
+        "huge.png", photo.read() + b"\0" * MAX_IMAGE_BYTES, content_type="image/png"
+    )
+
+    form = ProductForm(product_data(category), {"image": oversized})
+
+    assert not form.is_valid()
+    assert "at most 2 MB" in form.errors["image"][0]
+
+
+def test_form_clears_a_photo(product, photo):
+    product.image.save("photo.png", photo)
+    data = product_data(product.category, name=product.name, slug=product.slug)
+    data["image-clear"] = "on"
+
+    form = ProductForm(data, instance=product)
+
+    assert form.is_valid(), form.errors
+    assert not form.save().image
+
+
+def test_staff_can_create_a_product_with_a_photo(
+    client, staff_user, category, photo, media_root
+):
+    client.force_login(staff_user)
+
+    client.post(
+        reverse("products:manage_product_create"),
+        product_data(category, image=photo),
+    )
+
+    product = Product.objects.get(slug="mindsync-sleep-halo")
+    assert (media_root / product.image.name).is_file()
+
+
+def test_staff_can_add_a_photo_to_a_product(
+    client, staff_user, product, photo, media_root
+):
+    client.force_login(staff_user)
+    data = product_data(product.category, name=product.name, slug=product.slug)
+
+    client.post(
+        reverse("products:manage_product_update", kwargs={"pk": product.pk}),
+        data | {"image": photo},
+    )
+
+    product.refresh_from_db()
+    assert (media_root / product.image.name).is_file()
+
+
+def test_edit_form_shows_the_current_image(client, staff_user, product, photo):
+    client.force_login(staff_user)
+    url = reverse("products:manage_product_update", kwargs={"pk": product.pk})
+
+    assert 'src="/static/images/placeholders/home-assistants.svg"' in (
+        client.get(url).content.decode()
+    )
+
+    product.image.save("photo.png", photo)
+    page = client.get(url).content.decode()
+
+    assert f'src="{product.image.url}"' in page
+    assert 'enctype="multipart/form-data"' in page
 
 
 # --- Form validation ---------------------------------------------------------

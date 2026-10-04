@@ -136,6 +136,14 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "assets"]
 
 
+# Media files (product photos uploaded by staff or attached by seed).
+# Runtime data, like db.sqlite3: gitignored, created on first upload.
+
+MEDIA_URL = "media/"
+
+MEDIA_ROOT = BASE_DIR / "media"
+
+
 # Tailwind CSS + DaisyUI (django-tailwind-cli, standalone binary — no Node.js)
 
 TAILWIND_CLI_USE_DAISY_UI = True
