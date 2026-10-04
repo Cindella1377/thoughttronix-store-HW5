@@ -28,6 +28,63 @@ Each entry has this shape:
     - **Deviations:** recommendations overridden, follow-up questions asked
     - **Sideways:** failures, wrong turns, and how they were caught
 
+## 2026-10-04 — Designed product photos in a grill-me interview; wrote the PRD, plan, and handoff
+
+### Prompts
+1. /grill-me I need to include photos for the catolog protuct. There are two parts needed one with real images and the other a standard baseline placeholder. The photos are located in file named product-images to use.
+2. A, go with the ImageField
+3. A, exact matches only
+4. A, the clean No Text photo
+5. A, commit product-images and seed copies into media
+6. B, shrink the sources once, JPEG is fine
+7. B, and 2 MB is fine
+8. A, leave them
+9. B, the square box
+10. B, add the thumbnail to the back-office product list
+11. A, keep the per-category placeholders
+12. A, write the PRD then the plan
+13. create .claude/skills/handoff/SKILL.md and i'll add the text
+14. /handoff the next session implements the design we just agreed
+15. commit the PRD, plan, and handoff
+16. commit the handoff skill too are the session logs bring written in prompts.md?
+17. fix those two lines and commit
+18. Append a session log to PROMPTS.md
+
+### Summary
+- **Outcome:** No application code changed. An eleven-question interview
+  settled the product photos design: an `ImageField` on `Product`, photos
+  only for exactly matching products, the clean SyncRest photo, committed
+  JPEG sources that `seed` copies into a gitignored `media/`, staff upload
+  with a 2 MB limit, a square catalog image box, a back-office thumbnail,
+  and the existing per-category placeholders as the fallback. The agent
+  wrote `prd/product-images.md`, `plans/product-images.md`, and
+  `HANDOFF.md`, and created an empty `.claude/skills/handoff/SKILL.md`
+  that the user filled in. Three commits were made on a new
+  `product-images` branch (`d473a00`, `4baa366`, `89b0bc4`); nothing was
+  pushed. `product-images/` is still untracked.
+- **Deviations:** None from the recommendations: every answer in prompts
+  2–12 chose the option the agent recommended. Several questions also
+  asked whether the homework wording said anything specific (uploads
+  versus static files, a single placeholder); those parts were never
+  answered, so the design rests on the agent's reading of the request.
+  Prompt 16 was a follow-up asking whether the session was being logged
+  here; it was not, because this file's rules forbid unprompted entries.
+  Prompt 18 was a shortened form of the session-log prompt.
+- **Sideways:** The agent wrote the plan's Phase 5 and the handoff before
+  reading this file's header, and both told a later agent to append to
+  `PROMPTS.md` by itself; the handoff also listed this session's prompts
+  for the next session to log. The agent caught this when answering
+  prompt 16, and prompt 17 had both lines corrected. The first commit
+  went onto a new `product-images` branch the user had not asked for,
+  where earlier commits all went to `main`; the agent reported it and the
+  user did not object. The PRD's product slugs were worked out by reading
+  the product names, not by running `slugify`. The user moved to the
+  handoff without saying whether they had read the PRD and plan, so the
+  handoff asks the next session to confirm them first. Three details in
+  those documents went beyond the literal answers: the original PNGs stay
+  in place behind a `.gitignore` rule, the JPEGs keep the original file
+  names, and the fallback lives in one `Product.image_url` property.
+
 ## 2026-09-27 — Stopped the dev server; committed the source.css safelist and the Homework 4 reflection
 
 *Continues the coupon session logged in the two entries below; these are

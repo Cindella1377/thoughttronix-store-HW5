@@ -115,6 +115,18 @@ CATALOG = {
             ["sleep", "gift idea"],
             True,
         ),
+        (
+            "Lumin Drake",
+            Decimal("349.00"),
+            "A study companion who remembers everything you read.",
+            "A pocket-sized dragon with luminous wings, a satchel of scrolls, "
+            "and a quill that never rests. Lumin Drake perches beside your "
+            "child at homework time, answers every question, and takes "
+            "careful notes on the ones they were afraid to ask. The compass "
+            "always points to where they've been.",
+            ["kids", "gift idea", "new"],
+            True,
+        ),
     ],
     "Neural Implants": [
         (
@@ -438,6 +450,7 @@ PHOTO_DIR = settings.BASE_DIR / "product-images"
 PRODUCT_PHOTOS = {
     "seraphine": "Seraphine GPT Text.jpg",
     "hush": "Hush GPT No Text.jpg",
+    "lumin-drake": "Lumin Drake.jpg",
     "mindsync": "MindSync GPT 2.jpg",
     "mindsync-duo": "MindSync Duo.jpg",
     "recallpro": "RecallPro.jpg",

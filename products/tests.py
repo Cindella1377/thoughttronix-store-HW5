@@ -275,7 +275,7 @@ def test_seed_photos_match_the_catalog_and_the_files_on_disk():
         slugify(name) for entries in CATALOG.values() for name, *_ in entries
     }
 
-    assert len(PRODUCT_PHOTOS) == 12
+    assert len(PRODUCT_PHOTOS) == 13
     for slug, filename in PRODUCT_PHOTOS.items():
         assert slug in catalog_slugs, slug
         assert (PHOTO_DIR / filename).is_file(), filename
@@ -286,7 +286,7 @@ def test_seed_builds_the_demo_world(db):
 
     assert Category.objects.count() == 6
     assert Tag.objects.count() == 12
-    assert Product.objects.count() == 34
+    assert Product.objects.count() == 35
 
     User = get_user_model()
     admin = User.objects.get(username="admin")
